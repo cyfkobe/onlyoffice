@@ -1,0 +1,98 @@
+version: '3'                                                                                                                                                                                  
+services:   
+  onlyoffice-mysql-server:
+    container_name: onlyoffice-mysql-server
+    image: mysql:5.7.21
+    hostname: onlyoffice-community-server
+    environment:
+     - MYSQL_ROOT_PASSWORD=123456
+    networks:
+     - onlyoffice
+    stdin_open: true
+    tty: true
+    restart: always
+    volumes:
+     - ./mysql/conf.d:/etc/mysql/conf.d 
+     - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+     - ./mysql/data:/var/lib/mysql
+  onlyoffice-community-server:
+    container_name: onlyoffice-community-server
+    image: onlyoffice/communityserver:10.0.4.959
+    hostname: onlyoffice-community-server
+    depends_on:
+     - onlyoffice-mysql-server
+     - onlyoffice-document-server
+     - onlyoffice-mail-server
+    environment:
+     - DOCUMENT_SERVER_PORT_80_TCP_ADDR=onlyoffice-document-server
+     - MYSQL_SERVER_ROOT_PASSWORD=123456
+     - MYSQL_SERVER_DB_NAME=onlyoffice 
+     - MYSQL_SERVER_HOST=onlyoffice-mysql-server 
+     - MYSQL_SERVER_USER=community
+     - MYSQL_SERVER_PASS=123456
+     - MAIL_SERVER_API_PORT=8081
+     - MAIL_SERVER_API_HOST=onlyoffice-mail-server
+     - MAIL_SERVER_DB_HOST=onlyoffice-mysql-server
+     - MAIL_SERVER_DB_PORT=3306
+     - MAIL_SERVER_DB_NAME=onlyoffice_mailserver
+     - MAIL_SERVER_DB_USER=mail
+     - MAIL_SERVER_DB_PASS=123456
+    networks:
+     - onlyoffice
+    ports:  
+     - '80:80'
+     - '443:443'
+     - '5222:5222'
+    stdin_open: true
+    tty: true
+    restart: always
+    volumes:
+     - ./community/data:/var/www/onlyoffice/Data
+     - ./community/log:/var/log/onlyoffice
+     - ./community/document/data:/var/www/onlyoffice/DocumentServerData
+     - ./community/certs:/var/www/onlyoffice/Data/certs
+  onlyoffice-document-server:
+    container_name: onlyoffice-document-server
+    image: onlyoffice/documentserver:5.4.1.39
+    hostname: onlyoffice-document-server
+    stdin_open: true
+    tty: true
+    restart: always
+    networks:
+      - onlyoffice
+    expose: 
+      - '80'
+      - '443'
+    volumes:
+       - ./document/data:/var/www/onlyoffice/Data
+       - ./document/log:/var/log/onlyoffice                                                                                                                                              
+       - ./document/fonts:/usr/share/fonts/truetype/custom
+       - ./document/forgotten:/var/lib/onlyoffice/documentserver/App_Data/cache/files/forgotten
+  onlyoffice-mail-server:
+    container_name: onlyoffice-mail-server
+    image: onlyoffice/mailserver:1.6.60
+    depends_on:
+     - onlyoffice-mysql-server
+    hostname: mail.qj.com
+    environment:
+       - MYSQL_SERVER=onlyoffice-mysql-server
+       - MYSQL_SERVER_PORT=3306
+       - MYSQL_ROOT_USER=root
+       - MYSQL_ROOT_PASSWD=123456
+       - MYSQL_SERVER_DB_NAME=onlyoffice_mailserver
+    networks:
+      - onlyoffice
+    restart: always
+    privileged: true
+    ports: ['25:25','143:143','587:587']
+    stdin_open: true
+    tty: true
+    expose: 
+      - '8081'
+    volumes:
+      - ./mail/data:/var/vmail
+      - ./mail/certs:/etc/pki/tls/mailserver
+      - ./mail/log:/var/log
+networks:   
+  onlyoffice:
+    driver: 'bridge'
