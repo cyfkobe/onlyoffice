@@ -5,7 +5,9 @@ services:
     image: mysql:5.7.21
     hostname: onlyoffice-community-server
     environment:
-     - MYSQL_ROOT_PASSWORD=123456
+     - MYSQL_ROOT_PASSWORD=office@admin123456
+    ports:
+     - '3306:3306'
     networks:
      - onlyoffice
     stdin_open: true
@@ -25,18 +27,18 @@ services:
      - onlyoffice-mail-server
     environment:
      - DOCUMENT_SERVER_PORT_80_TCP_ADDR=onlyoffice-document-server
-     - MYSQL_SERVER_ROOT_PASSWORD=123456
+     - MYSQL_SERVER_ROOT_PASSWORD=office@admin123456
      - MYSQL_SERVER_DB_NAME=onlyoffice 
      - MYSQL_SERVER_HOST=onlyoffice-mysql-server 
      - MYSQL_SERVER_USER=community
-     - MYSQL_SERVER_PASS=123456
+     - MYSQL_SERVER_PASS=office@com123456
      - MAIL_SERVER_API_PORT=8081
      - MAIL_SERVER_API_HOST=onlyoffice-mail-server
      - MAIL_SERVER_DB_HOST=onlyoffice-mysql-server
      - MAIL_SERVER_DB_PORT=3306
      - MAIL_SERVER_DB_NAME=onlyoffice_mailserver
      - MAIL_SERVER_DB_USER=mail
-     - MAIL_SERVER_DB_PASS=123456
+     - MAIL_SERVER_DB_PASS=office@mail123456
     networks:
      - onlyoffice
     ports:  
@@ -78,7 +80,7 @@ services:
        - MYSQL_SERVER=onlyoffice-mysql-server
        - MYSQL_SERVER_PORT=3306
        - MYSQL_ROOT_USER=root
-       - MYSQL_ROOT_PASSWD=123456
+       - MYSQL_ROOT_PASSWD=office@admin123456
        - MYSQL_SERVER_DB_NAME=onlyoffice_mailserver
     networks:
       - onlyoffice
